@@ -1,0 +1,976 @@
+openapi: 3.0.0
+info:
+  title: Chiri Project Management Tools
+  version: 1.0.0
+  description: >
+    Chiri is a web-based, kanban-style, list-making application.
+    Chiri is the tool that keeps you connected to all of the teams in your life. · Real-time updates mean everyone shares the same perspective.
+  termsOfService: https://example.com/terms
+  contact:
+    name: Api Support
+    email: contact@example.com
+    url: https://example.com/api-support
+servers:
+  - description: The production api server
+    url: https://example.com/api/v1
+  - description: The development api server
+    url: http://localhost:5050/api/v1
+tags:
+  - name: Auth
+    description: Authentication Endpoints (public)
+  - name: Board
+    description: Board Endpoints (private)
+  - name: Section
+    description: Section Endpoints (private)
+  - name: Task
+    description: Task Endpoints (private)
+paths:
+  /auth/signup:
+    post:
+      tags:
+        - "Auth"
+      description: create a new account
+      summary: create a new account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/SignupDto"
+      responses:
+        "201":
+          description: Signup Successful
+          content:
+            "application/json":
+              schema:
+                type: object
+                required:
+                  - statusCode
+                  - message
+                  - data
+                  - links
+                properties:
+                  statusCode:
+                    type: integer
+                    format: int32
+                    example: 201
+                  message:
+                    type: string
+                    example: Signup Successful
+                  data:
+                    type: object
+                    required:
+                      - access_token
+                    properties:
+                      access_token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        example: "/auth/signup"
+                      signin:
+                        type: string
+                        example: "/auth/signin"
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+  /auth/signin:
+    post:
+      tags:
+        - "Auth"
+      description: Login to your account
+      summary: Login to your account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/SigninDto"
+      responses:
+        "201":
+          description: Signin Successful
+          content:
+            "application/json":
+              schema:
+                type: object
+                required:
+                  - statusCode
+                  - message
+                  - data
+                  - links
+                properties:
+                  statusCode:
+                    type: integer
+                    format: int32
+                    example: 201
+                  message:
+                    type: string
+                    example: Signin Successful
+                  data:
+                    type: object
+                    required:
+                      - access_token
+                    properties:
+                      access_token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        example: "/auth/signin"
+
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+  /boards:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Board
+      description: Create a new board
+      summary: Create a new board
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/Board"
+      responses:
+        "201":
+          description: Successfully created a new board
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 201
+                  data:
+                    allOf:
+                      - type: object
+                        properties:
+                          author:
+                            $ref: "#/components/schemas/AuthorDto"
+                      - $ref: "#/components/schemas/Board"
+
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Board
+      description: Retrieve all boards
+      summary: Retrieve all boards
+      parameters:
+        - $ref: "#/components/parameters/pageParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortTypeParam"
+        - $ref: "#/components/parameters/sortByParam"
+        - $ref: "#/components/parameters/searchParam"
+      responses:
+        "200":
+          description: Return a list of boards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - type: object
+                      required:
+                        - author
+                        - link
+                      properties:
+                        author:
+                          $ref: "#components/schemas/AuthorDto"
+                        link:
+                          type: string
+                          format: url
+                          example: "/boards/1"
+                    - $ref: "#components/schemas/Board"
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+  /boards/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Board
+      description: Fetch a single board
+      summary: Fetch a single board
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      responses:
+        "200":
+          description: Single board view
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      author:
+                        $ref: "#/components/schemas/AuthorDto"
+                  - $ref: "#/components/schemas/Board"
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+    patch:
+      security:
+        - bearerAuth: []
+      tags:
+        - Board
+      description: Partially update an board
+      summary: Partially update an board
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/Board"
+      responses:
+        "200":
+          description: Successfully Update board
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  data:
+                    allOf:
+                      - type: object
+                        properties:
+                          author:
+                            $ref: "#components/schemas/AuthorDto"
+                      - $ref: "#components/schemas/Board"
+
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Board
+      description: Delete an board by id
+      summary: Delete an board by id
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/Board"
+      responses:
+        "204":
+          description: Successfully deleted board
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 204
+                  data:
+                    allOf:
+                      - type: object
+                        properties:
+                          author:
+                            $ref: "#components/schemas/AuthorDto"
+                      - $ref: "#components/schemas/Board"
+
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+  /sections:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Section
+      description: Create a new Section
+      summary: Create a new Section
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/Section"
+      responses:
+        "201":
+          description: Successfully created a new Section
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 201
+                  data:
+                    allOf:
+                      - type: object
+                        properties:
+                          author:
+                            $ref: "#/components/schemas/AuthorDto"
+                      - $ref: "#/components/schemas/Section"
+
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+  /sections/{id}:
+    patch:
+      security:
+        - bearerAuth: []
+      tags:
+        - Section
+      description: Partially update an Section
+      summary: Partially update an Section
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/Section"
+      responses:
+        "200":
+          description: Successfully Update Section
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  data:
+                    allOf:
+                      - type: object
+                        properties:
+                          author:
+                            $ref: "#components/schemas/AuthorDto"
+                      - $ref: "#components/schemas/Section"
+
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Section
+      description: Delete an Section by id
+      summary: Delete an Section by id
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/Section"
+      responses:
+        "204":
+          description: Successfully deleted Section
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 204
+                  data:
+                    allOf:
+                      - type: object
+                        properties:
+                          author:
+                            $ref: "#components/schemas/AuthorDto"
+                      - $ref: "#components/schemas/Section"
+
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+  /tasks:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Task
+      description: Create a new Task
+      summary: Create a new Task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/Task"
+      responses:
+        "201":
+          description: Successfully created a new Task
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 201
+                  data:
+                    allOf:
+                      - type: object
+                        properties:
+                          author:
+                            $ref: "#/components/schemas/AuthorDto"
+                      - $ref: "#/components/schemas/Task"
+
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Task
+      description: Retrieve all Tasks
+      summary: Retrieve all Tasks
+      parameters:
+        - $ref: "#/components/parameters/pageParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortTypeParam"
+        - $ref: "#/components/parameters/sortByParam"
+        - $ref: "#/components/parameters/searchParam"
+      responses:
+        "200":
+          description: Return a list of Tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - type: object
+                      required:
+                        - author
+                        - link
+                      properties:
+                        author:
+                          $ref: "#components/schemas/AuthorDto"
+                        link:
+                          type: string
+                          format: url
+                          example: "/Tasks/1"
+                    - $ref: "#components/schemas/Task"
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+  /tasks/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Task
+      description: Fetch a single Task
+      summary: Fetch a single Task
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      responses:
+        "200":
+          description: Single Task view
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      author:
+                        $ref: "#/components/schemas/AuthorDto"
+                  - $ref: "#/components/schemas/Task"
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+    patch:
+      security:
+        - bearerAuth: []
+      tags:
+        - Task
+      description: Partially update an Task
+      summary: Partially update an Task
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/Task"
+      responses:
+        "200":
+          description: Successfully Update Task
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  data:
+                    allOf:
+                      - type: object
+                        properties:
+                          author:
+                            $ref: "#components/schemas/AuthorDto"
+                      - $ref: "#components/schemas/Task"
+
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Task
+      description: Delete an Task by id
+      summary: Delete an Task by id
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/Task"
+      responses:
+        "204":
+          description: Successfully deleted Task
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 204
+                  data:
+                    allOf:
+                      - type: object
+                        properties:
+                          author:
+                            $ref: "#components/schemas/AuthorDto"
+                      - $ref: "#components/schemas/Task"
+
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Timestamp:
+      type: object
+      required:
+        - createdAt
+        - updatedAt
+      properties:
+        createdAt:
+          type: string
+          format: datetime
+          example: 2023-06-03T11:56:31.943Z
+        updatedAt:
+          type: string
+          format: datetime
+          example: 2023-06-03T11:56:31.943Z
+    SignupDto:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          example: Mohamamd Sujon
+        email:
+          type: string
+          format: email
+          example: admin@devsuon.com
+        password:
+          type: string
+          format: password
+          example: pass1234@
+    SigninDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@devsuon.com
+        password:
+          type: string
+          format: password
+          example: pass1234@
+    AuthorDto:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 6478bb0e3ab65642d182d661
+        name:
+          type: string
+          example: "Mohammad Sujon"
+    Board:
+      allOf:
+        - type: object
+          required:
+            - user
+          properties:
+            user:
+              type: string
+              example: 6478a89127ecca17fd9cee8a
+            icon:
+              type: string
+              example: 📃
+            title:
+              type: string
+              example: Untitled
+            description:
+              type: string
+              example: >
+                Add description here
+                🟢 You can add multiline description
+                🟢 Let's start...
+            position:
+              type: integer
+              example: 1
+            favourite:
+              type: boolean
+              example: 📃
+            favouritePosition:
+              type: integer
+              default: 0
+        - $ref: "#components/schemas/Timestamp"
+    Section:
+      allOf:
+        - type: object
+          required:
+            - board
+          properties:
+            board:
+              type: string
+              example: 6478a89127ecca17fd9cee8a
+            title:
+              type: string
+        - $ref: "#components/schemas/Timestamp"
+    Task:
+      allOf:
+        - type: object
+          required:
+            - section
+          properties:
+            section:
+              type: string
+              example: 6478a89127ecca17fd9cee8a
+            title:
+              type: string
+            content:
+              type: string
+            position:
+              type: integer
+        - $ref: "#components/schemas/Timestamp"
+
+  responses:
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            required:
+              - statusCode
+              - error
+              - message
+            properties:
+              statusCode:
+                type: integer
+                format: int32
+                example: 400
+              error:
+                type: string
+                example: "Bad Request"
+              message:
+                type: string
+                example: "Bad Request"
+              date:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - field
+                    - message
+                    - in
+                  properties:
+                    field:
+                      type: string
+                      example: email
+                    message:
+                      type: string
+                      example: Invalid email
+                    in:
+                      type: string
+                      enum:
+                        - body
+                        - params
+                        - query
+                        - headers
+    "401":
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - statusCode
+              - error
+              - message
+            properties:
+              statusCode:
+                type: integer
+                format: int32
+                example: 401
+              error:
+                type: string
+                example: Unauthorized
+              message:
+                type: string
+                example: Unauthorized Credential
+    "403":
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - statusCode
+              - error
+              - message
+            properties:
+              statusCode:
+                type: integer
+                format: int32
+                example: 403
+              error:
+                type: string
+                example: Forbidden
+              message:
+                type: string
+                example: You don't have the right permissions
+    "404":
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - statusCode
+              - error
+              - message
+            properties:
+              statusCode:
+                type: integer
+                format: int32
+                example: 404
+              error:
+                type: string
+                example: Not Found
+              message:
+                type: string
+                example: Requested resource not found
+    "500":
+      description: "Internal Server Error"
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+                example: 500
+              error:
+                type: string
+                example: Internal Server Error
+              message:
+                type: string
+                example: We are sorry for the inconvenience. Please try again later
+  parameters:
+    pageParam:
+      in: query
+      name: page
+      description: current page number
+      schema:
+        type: integer
+        format: int32
+        example: 2
+    limitParam:
+      in: query
+      name: limit
+      description: maximum items to be returned
+      schema:
+        type: integer
+        format: int32
+        example: 10
+    sortTypeParam:
+      in: query
+      name: sort_type
+      description: type of sort (asc or dsc)
+      schema:
+        type: string
+        enum: [asc, dsc]
+        example: dsc
+    sortByParam:
+      in: query
+      name: sort_by
+      description: Sort key
+      schema:
+        type: string
+        example: 2023-06-03T11:56:31.943Z
+    searchParam:
+      in: query
+      name: search
+      description: Search term
+      schema:
+        type: string
+        example: title
+    idPathParam:
+      in: path
+      name: id
+      required: true
+      description: ID
+      schema:
+        type: integer
+        format: int32
+        example: 6478bb0e3ab65642d182d661
