@@ -27,6 +27,13 @@ export class TaskService {
     return task;
   }
 
+  async findAll(query: unknown): Promise<Task[]> {
+    return await this.taskModel
+      .find(query)
+      .populate('sectionID')
+      .sort('-position');
+  }
+
   updateById(id: Types.ObjectId, updateTaskDto: UpdateTaskDto): Promise<Task> {
     const task = this.taskModel.findByIdAndUpdate(
       id,
@@ -81,7 +88,7 @@ export class TaskService {
     return;
   }
 
-  async removeManyBySectionID(sectionID: Types.ObjectId): Promise<void> {
-    await this.taskModel.deleteMany({ sectionID });
+  async removeMany(query: unknown): Promise<void> {
+    await this.taskModel.deleteMany(query);
   }
 }

@@ -15,5 +15,6 @@ import { TaskModule } from '../task/task.module';
   ],
   controllers: [SectionController],
   providers: [SectionService],
+  exports: [SectionService],
 })
 export class SectionModule {}

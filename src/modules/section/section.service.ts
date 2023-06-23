@@ -19,6 +19,10 @@ export class SectionService {
     return this.sectionModel.create(createSectionDto);
   }
 
+  async findAll(query: unknown): Promise<Section[]> {
+    return await this.sectionModel.find(query);
+  }
+
   async findById(id: Types.ObjectId): Promise<Section> {
     return await this.sectionModel.findById(id);
   }
@@ -40,7 +44,11 @@ export class SectionService {
     const section = await this.sectionModel.findByIdAndDelete(id);
 
     if (!section) throw new NotFoundException('Section not found');
-    await this.taskService.removeManyBySectionID(section._id);
+    await this.taskService.removeMany({ sectionID: section._id });
     return section;
+  }
+
+  async removeMany(query: unknown): Promise<void> {
+    await this.sectionModel.deleteMany(query);
   }
 }
