@@ -12,9 +12,9 @@ info:
     url: https://example.com/api-support
 servers:
   - description: The production api server
-    url: https://example.com/api/v1
+    url: http://localhost:6100/api/v1
   - description: The development api server
-    url: http://localhost:5050/api/v1
+    url: http://localhost:6100/api/v1
 tags:
   - name: Auth
     description: Authentication Endpoints (public)
@@ -438,11 +438,6 @@ paths:
       summary: Delete an Section by id
       parameters:
         - $ref: "#/components/parameters/idPathParam"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#components/schemas/Section"
       responses:
         "204":
           description: Successfully deleted Section
@@ -514,82 +509,7 @@ paths:
           $ref: "#components/responses/404"
         "500":
           $ref: "#components/responses/500"
-    get:
-      security:
-        - bearerAuth: []
-      tags:
-        - Task
-      description: Retrieve all Tasks
-      summary: Retrieve all Tasks
-      parameters:
-        - $ref: "#/components/parameters/pageParam"
-        - $ref: "#/components/parameters/limitParam"
-        - $ref: "#/components/parameters/sortTypeParam"
-        - $ref: "#/components/parameters/sortByParam"
-        - $ref: "#/components/parameters/searchParam"
-      responses:
-        "200":
-          description: Return a list of Tasks
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  allOf:
-                    - type: object
-                      required:
-                        - author
-                        - link
-                      properties:
-                        author:
-                          $ref: "#components/schemas/AuthorDto"
-                        link:
-                          type: string
-                          format: url
-                          example: "/Tasks/1"
-                    - $ref: "#components/schemas/Task"
-        "400":
-          $ref: "#components/responses/400"
-        "401":
-          $ref: "#components/responses/401"
-        "403":
-          $ref: "#components/responses/403"
-        "404":
-          $ref: "#components/responses/404"
-        "500":
-          $ref: "#components/responses/500"
   /tasks/{id}:
-    get:
-      security:
-        - bearerAuth: []
-      tags:
-        - Task
-      description: Fetch a single Task
-      summary: Fetch a single Task
-      parameters:
-        - $ref: "#/components/parameters/idPathParam"
-      responses:
-        "200":
-          description: Single Task view
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - type: object
-                    properties:
-                      author:
-                        $ref: "#/components/schemas/AuthorDto"
-                  - $ref: "#/components/schemas/Task"
-        "400":
-          $ref: "#components/responses/400"
-        "401":
-          $ref: "#components/responses/401"
-        "403":
-          $ref: "#components/responses/403"
-        "404":
-          $ref: "#components/responses/404"
-        "500":
-          $ref: "#components/responses/500"
     patch:
       security:
         - bearerAuth: []
@@ -647,6 +567,48 @@ paths:
           application/json:
             schema:
               $ref: "#components/schemas/Task"
+      responses:
+        "204":
+          description: Successfully deleted Task
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 204
+                  data:
+                    allOf:
+                      - type: object
+                        properties:
+                          author:
+                            $ref: "#components/schemas/AuthorDto"
+                      - $ref: "#components/schemas/Task"
+
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+  /tasks/position:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Task
+      description: Update position an Task
+      summary: Update position an Task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/UpdatePositionTaskDto"
       responses:
         "204":
           description: Successfully deleted Task
@@ -743,6 +705,33 @@ components:
         name:
           type: string
           example: "Mohammad Sujon"
+    UpdatePositionTaskDto:
+      type: object
+      required:
+        - destinationSectionId
+        - resourceSectionId
+        - destinationList
+        - resourceList
+
+      properties:
+        destinationSectionId:
+          type: integer
+          format: int32
+          example: 6478bb0e3ab65642d182d661
+        resourceSectionId:
+          type: integer
+          format: int32
+          example: 6478bb0e3ab65642d182d661
+        destinationList:
+          type: array
+          items:
+            type: string
+            example: 6478bb0e3ab65642d182d661
+        resourceList:
+          type: array
+          items:
+            type: string
+            example: 6478bb0e3ab65642d182d661
     Board:
       allOf:
         - type: object
@@ -778,9 +767,9 @@ components:
       allOf:
         - type: object
           required:
-            - board
+            - boardID
           properties:
-            board:
+            boardID:
               type: string
               example: 6478a89127ecca17fd9cee8a
             title:
@@ -792,7 +781,7 @@ components:
           required:
             - section
           properties:
-            section:
+            sectionID:
               type: string
               example: 6478a89127ecca17fd9cee8a
             title:
@@ -971,6 +960,5 @@ components:
       required: true
       description: ID
       schema:
-        type: integer
-        format: int32
+        type: string
         example: 6478bb0e3ab65642d182d661

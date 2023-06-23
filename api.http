@@ -1,0 +1,37 @@
+###addBook
+POST http://localhost:3000/auth/signup
+Content-Type: application/json
+
+{
+    "name": "Mohammad Sujon",
+    "email": "connectd@devsujon.in",
+    "password": "pass1234@"
+}
+###
+POST http://localhost:3000/auth/signin
+Content-Type: application/json
+
+{
+    "name": "Mohammad Sujon",
+    "email": "connectd@devsujon.in",
+    "password": "pass1s234@"
+}
+
+### find all sections
+GET http://localhost:3000/sections
+
+### find one task
+GET http://localhost:3000/tasks/567d7605-70ff-4c7e-9398-27f01dd81304
+
+
+### update task
+PATCH http://localhost:3000/tasks/dc6e1795-7356-4833-a202-7df71405203c
+Content-Type: application/json
+
+{
+    "status": "COMPLETE"
+}
+
+
+###deleteBook
+DELETE http://localhost:3000/tasks/d98c928a-7941-40db-baad-d2c9630cef21
